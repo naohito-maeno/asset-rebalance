@@ -249,26 +249,33 @@ st.download_button(
 )
 
 # -----------------------------------------------------------------------------
-# 8. 【追加】ノイズとなる外部アイコン・フッターの強制非表示設定（CSS注入）
+# 8. 【修正版】ノイズとなる外部アイコン・ヘッダー・フッターの完全強制非表示設定
 # -----------------------------------------------------------------------------
 hide_style = """
     <style>
-    /* 右上のGitHubアイコンを非表示 */
-    .viewerBadge_link__1S137 {display: none !important;}
-    a.viewerBadge_link__1S137 {display: none !important;}
-    
-    /* 右下のStreamlitフッターを非表示 */
-    footer {visibility: hidden;}
-    footer:after {
-        content:''; 
-        display:block; 
-        position:absolute;
-        top:0; left:0; width:100%; height:100%;
-        background-color: transparent;
+    /* 1. 画面最上部のヘッダーエリア（GitHub、Fork、3つの点ボタンが含まれる帯）を丸ごと非表示 */
+    header[data-testid="stHeader"] {
+        display: none !important;
     }
     
-    /* 右上のハンバーガーメニュー内の不要項目（公式リンク等）を目立たなくする、または非表示 */
-    #MainMenu {visibility: hidden;}
+    /* 2. 画面右下に常駐するStreamlitのフローティングメニュー（無料版のサインインや管理ボタン）を丸ごと非表示 */
+    .stAppDeployButton {
+        display: none !important;
+    }
+    div[data-testid="stStatusWidget"] {
+        display: none !important;
+    }
+    
+    /* 3. フッターエリア（footerタグ）も念のため完全非表示 */
+    footer {
+        visibility: hidden !important;
+        display: none !important;
+    }
+    
+    /* 4. スクロール時に余計な余白が生まれるのを防ぐ調整 */
+    .stApp {
+        margin-top: -40px;
+    }
     </style>
 """
 st.markdown(hide_style, unsafe_allow_html=True)
