@@ -76,7 +76,6 @@ st.markdown("---")
 st.header("📂 設定の保存・読み込み")
 uploaded_file = st.file_uploader("過去に保存したツール設定ファイル（.csv）があれば、ここにドラッグ＆ドロップしてください", type="csv")
 
-# デフォルト設定値の準備
 saved_rows = []
 saved_targets = {atype: 0.0 for atype in ASSET_TYPES}
 saved_targets["無リスク資産"] = 0.0
@@ -84,7 +83,6 @@ saved_targets["無リスク資産"] = 0.0
 if uploaded_file is not None:
     try:
         df_load = pd.read_csv(uploaded_file)
-        # データの分類
         df_risk = df_load[df_load['type'] == 'risk']
         df_target = df_load[df_load['type'] == 'target']
         
@@ -103,14 +101,11 @@ if uploaded_file is not None:
 st.markdown("---")
 
 # -----------------------------------------------------------------------------
-# 4. 現在の資産入力（縦並びでゆったり配置）
+# 4. 現在の資産入力
 # -----------------------------------------------------------------------------
 st.header("1. 現在の資産入力")
-
-# リスク資産の入力欄
 st.subheader("🔹 リスク資産の入力")
 
-# 読み込んだデータの件数を初期値にする（なければ5）
 init_row_count = len(saved_rows) if len(saved_rows) > 0 else 5
 row_count = st.number_input("入力行数（保有しているファンドの数）", min_value=1, max_value=20, value=int(init_row_count))
 
@@ -119,12 +114,10 @@ risk_data = []
 for i in range(int(row_count)):
     st.markdown(f"##### 【{i+1}件目】")
     
-    # 復元データの取得
     d_type = saved_rows[i]["asset_type"] if i < len(saved_rows) else ASSET_TYPES[0]
     d_brand = saved_rows[i]["brand"] if i < len(saved_rows) else None
     d_account = saved_rows[i]["account_type"] if i < len(saved_rows) else ACCOUNT_TYPES[0]
     
-    # 横幅をPCでもしっかり確保する比率
     c_a, c_b, c_c, c_d = st.columns([1.2, 2.5, 1.3, 1.5])
     
     with c_a:
@@ -142,13 +135,11 @@ for i in range(int(row_count)):
         
     with c_d:
         amount = st.number_input(f"評価額（円）", min_value=0, value=0, step=10000, key=f"amount_{i}")
-        # コンマ付き金額プレビュー（入力欄のすぐ下に出力）
         st.markdown(f"👉 **{amount:,} 円**")
         
     risk_data.append({"asset_type": asset_type, "amount": amount, "brand": brand, "account_type": account_type})
     st.markdown(" ")
 
-# 無リスク資産の入力欄
 st.markdown("---")
 st.subheader("🔹 無リスク資産の入力")
 c_cash1, c_cash2 = st.columns(2)
@@ -161,7 +152,6 @@ with c_cash2:
     
 cash_total = cash_bank + cash_bond
 
-# データ集計（SUMIF関数相当）
 current_summary = {atype: 0 for atype in ASSET_TYPES}
 current_summary["無リスク資産"] = cash_total
 
@@ -173,7 +163,7 @@ total_assets = sum(current_summary.values())
 st.markdown("---")
 
 # -----------------------------------------------------------------------------
-# 5. 目標比率の設定（縦並びで入力しやすい形へ）
+# 5. 目標比率の設定
 # -----------------------------------------------------------------------------
 st.header("2. 目標比率の設定 (%)")
 st.write("各資産の理想の配分比率を入力してください。合計が100%になるように調整します。")
@@ -182,7 +172,6 @@ target_ratios = {}
 total_target_ratio = 0.0
 all_categories = ASSET_TYPES + ["無リスク資産"]
 
-# 横に並べて省スペース化しつつ入力しやすく配置
 c_target = st.columns(3)
 for idx, atype in enumerate(all_categories):
     with c_target[idx % 3]:
@@ -201,7 +190,6 @@ st.markdown("---")
 st.header("3. 分析結果とリバランス指示")
 st.write(f"### 💰 現在の総資産合計: **{total_assets:,} 円**")
 
-# テーブル表示
 st.markdown("| 資産タイプ | 目標比率 | 現在の合計額 | 現在の比率 | 必要売買額（＋購入 / －売却） |")
 st.markdown("| :--- | :---: | :---: | :---: | :---: |")
 
@@ -222,7 +210,6 @@ for atype in all_categories:
 st.markdown("---")
 st.markdown(f"| **合計** | **{total_target_ratio:.1f} %** | **{total_assets:,} 円** | **{100 if total_assets > 0 else 0} %** | - |")
 
-# 目標比率の合計チェック判定
 if total_target_ratio != 100.0:
     st.warning(f"⚠️ 目標比率の合計が **{total_target_ratio:.1f}%** になっています。100%になるように数値を調整してください。")
 else:
@@ -236,7 +223,6 @@ st.markdown("---")
 st.header("💾 今回の設定データを保存する")
 st.write("現在入力されている「資産タイプ」「銘柄名」「口座区分」「目標比率」のセットをパソコンにダウンロードしておけます。次回以降、一番上の欄に読み込ませることで入力を大幅に省略できます。")
 
-# 保存用データフレームの構築
 export_data = []
 for item in risk_data:
     export_data.append({
@@ -251,7 +237,6 @@ for atype, ratio in target_ratios.items():
 
 df_export = pd.DataFrame(export_data)
 
-# メモリ上にCSVを出力してダウンロードボタンに渡す
 csv_buffer = io.StringIO()
 df_export.to_csv(csv_buffer, index=False)
 csv_pasted = csv_buffer.getvalue()
@@ -262,3 +247,28 @@ st.download_button(
     file_name="my_portfolio_settings.csv",
     mime="text/csv"
 )
+
+# -----------------------------------------------------------------------------
+# 8. 【追加】ノイズとなる外部アイコン・フッターの強制非表示設定（CSS注入）
+# -----------------------------------------------------------------------------
+hide_style = """
+    <style>
+    /* 右上のGitHubアイコンを非表示 */
+    .viewerBadge_link__1S137 {display: none !important;}
+    a.viewerBadge_link__1S137 {display: none !important;}
+    
+    /* 右下のStreamlitフッターを非表示 */
+    footer {visibility: hidden;}
+    footer:after {
+        content:''; 
+        display:block; 
+        position:absolute;
+        top:0; left:0; width:100%; height:100%;
+        background-color: transparent;
+    }
+    
+    /* 右上のハンバーガーメニュー内の不要項目（公式リンク等）を目立たなくする、または非表示 */
+    #MainMenu {visibility: hidden;}
+    </style>
+"""
+st.markdown(hide_style, unsafe_allow_html=True)
