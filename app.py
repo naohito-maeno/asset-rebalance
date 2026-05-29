@@ -249,30 +249,31 @@ st.download_button(
 )
 
 # -----------------------------------------------------------------------------
-# 8. 【修正版】ノイズとなる外部アイコン・ヘッダー・フッターの完全強制非表示設定
+# 8. 【最終修正版】上下のノイズ・ボタン類を完全に強制消去する設定
 # -----------------------------------------------------------------------------
 hide_style = """
     <style>
-    /* 1. 画面最上部のヘッダーエリア（GitHub、Fork、3つの点ボタンが含まれる帯）を丸ごと非表示 */
+    /* 1. 画面最上部のヘッダーエリアを丸ごと非表示 */
     header[data-testid="stHeader"] {
         display: none !important;
     }
     
-    /* 2. 画面右下に常駐するStreamlitのフローティングメニュー（無料版のサインインや管理ボタン）を丸ごと非表示 */
-    .stAppDeployButton {
-        display: none !important;
-    }
-    div[data-testid="stStatusWidget"] {
-        display: none !important;
-    }
+    /* 2. 右下のデプロイ・管理系ボタンをあらゆる名称指定で完全非表示 */
+    .stAppDeployButton { display: none !important; }
+    div[data-testid="stStatusWidget"] { display: none !important; }
     
-    /* 3. フッターエリア（footerタグ）も念のため完全非表示 */
+    /* 3. 【超強力】画面右下に浮かぶすべてのボタン・ツールチップを強制非表示 */
+    div[data-testid="stDecoration"] { display: none !important; }
+    button[data-testid="stActionButton"] { display: none !important; }
+    iframe[title="Sign in with Google Button"] { display: none !important; }
+    
+    /* 4. フッターエリアも完全非表示 */
     footer {
         visibility: hidden !important;
         display: none !important;
     }
     
-    /* 4. スクロール時に余計な余白が生まれるのを防ぐ調整 */
+    /* 5. 画面全体の余白調整 */
     .stApp {
         margin-top: -40px;
     }
